@@ -15,6 +15,7 @@
 		44915EE0254E51870034C73E /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 44915EDE254E51870034C73E /* LaunchScreen.storyboard */; };
 		44915EEB254E51870034C73E /* Breakout_ARTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44915EEA254E51870034C73E /* Breakout_ARTests.swift */; };
 		44915EF6254E51870034C73E /* Breakout_ARUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44915EF5254E51870034C73E /* Breakout_ARUITests.swift */; };
+		44915F08254E54660034C73E /* BreakoutBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44915F07254E54660034C73E /* BreakoutBoard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		44915EF1254E51870034C73E /* Breakout ARUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Breakout ARUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		44915EF5254E51870034C73E /* Breakout_ARUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Breakout_ARUITests.swift; sourceTree = "<group>"; };
 		44915EF7254E51870034C73E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		44915F07254E54660034C73E /* BreakoutBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreakoutBoard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -100,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				44915ED3254E51840034C73E /* AppDelegate.swift */,
+				44915F06254E542F0034C73E /* BreakoutLogic */,
 				44915ED5254E51840034C73E /* art.scnassets */,
 				44915ED7254E51840034C73E /* ViewController.swift */,
 				44915ED9254E51840034C73E /* Main.storyboard */,
@@ -126,6 +129,14 @@
 				44915EF7254E51870034C73E /* Info.plist */,
 			);
 			path = "Breakout ARUITests";
+			sourceTree = "<group>";
+		};
+		44915F06254E542F0034C73E /* BreakoutLogic */ = {
+			isa = PBXGroup;
+			children = (
+				44915F07254E54660034C73E /* BreakoutBoard.swift */,
+			);
+			path = BreakoutLogic;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -260,6 +271,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				44915ED8254E51840034C73E /* ViewController.swift in Sources */,
+				44915F08254E54660034C73E /* BreakoutBoard.swift in Sources */,
 				44915ED4254E51840034C73E /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

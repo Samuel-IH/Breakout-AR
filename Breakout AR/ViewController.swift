@@ -26,7 +26,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let scene = SCNScene(named: "art.scnassets/ship.scn")!
         
         // Set the scene to the view
-        sceneView.scene = scene
+        sceneView.scene = BreakoutBoard()
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -34,7 +34,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-
+        configuration.environmentTexturing = .automatic
+        configuration.isLightEstimationEnabled = true
         // Run the view's session
         sceneView.session.run(configuration)
     }
