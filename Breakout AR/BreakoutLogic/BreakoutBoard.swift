@@ -84,6 +84,17 @@ class BreakoutBoard: SCNScene {
         self.physicsWorld.gravity = .init(0, 0, 0)
         self.physicsWorld.contactDelegate = self
         
+        //constraint to lock the ball
+        let ballLock = SCNTransformConstraint(inWorldSpace: false) {
+            node, matrix in
+            let n = SCNNode()
+            n.transform = matrix
+            n.position.y = 0
+            
+            return n.transform
+        }
+        self.ball.constraints?.append(ballLock)
+        
         
         
         
