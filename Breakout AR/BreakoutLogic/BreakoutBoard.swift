@@ -25,6 +25,8 @@ class BreakoutBoard: SCNScene {
         .init(color: .yellow)
     ]
     
+    fileprivate var ball = SCNNode()
+    
     init(withSize: CGFloat = 0.3) {
         super.init()
         
@@ -75,10 +77,12 @@ class BreakoutBoard: SCNScene {
         ballNode.position = .init(withSize/2, 0, withSize/2)
         
         self.rootNode.addChildNode(ballNode)
+        self.ball = ballNode
         
         //MARK: Configure the physics
         
         self.physicsWorld.gravity = .init(0, 0, 0)
+        self.physicsWorld.contactDelegate = self
         
         
         
@@ -94,3 +98,21 @@ class BreakoutBoard: SCNScene {
 }
 
 
+extension BreakoutBoard: SCNPhysicsContactDelegate {
+    
+    func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
+        
+        
+        //first, make sure the ball is involved
+        guard contact.nodeA == ball || contact.nodeB == ball else { return }
+        
+        //second, we "normalize" the contact, so we don't have to write two big if statements
+        var other = contact.nodeA
+        if contact.nodeA == ball {
+            other = contact.nodeB
+        }
+        
+        
+    }
+    
+}
