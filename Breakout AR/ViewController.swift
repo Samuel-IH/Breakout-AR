@@ -17,6 +17,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     private var handPoseRequest = VNDetectHumanHandPoseRequest()
     private var debugBall = SCNNode(geometry: SCNSphere(radius: 0.01))
     private var viewportSize = CGSize()
+    
+    var board = BreakoutBoard()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.viewportSize = self.sceneView.bounds.size
@@ -28,7 +31,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         sceneView.showsStatistics = true
         
         // Set the scene to the view
-        sceneView.scene = BreakoutBoard()
+        sceneView.scene = board
         
         let node = SCNNode(geometry: SCNBox(width: 0.01, height: 0.01, length: 0.01, chamferRadius: 0))
         node.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(node: node))
@@ -113,6 +116,7 @@ extension ViewController: SCNSceneRendererDelegate {
             guard let wrist3D = self.sceneView.unprojectPoint(wrist, ontoPlane: simd_float4x4(sceneView.scene.rootNode.transform)) else {
                 return
             }
+            self.board.paddle.position.x = wrist3D.x
             self.debugBall.simdPosition = wrist3D
         } catch {
             print(error.localizedDescription)

@@ -66,9 +66,10 @@ class BreakoutBoard: SCNScene {
         //MARK: Create the paddle
         let paddleGeom = SCNBox(width: withSize/10, height: withSize/32, length: withSize/32, chamferRadius: 0)
         let paddleNode = SCNNode(geometry: paddleGeom)
-        
+        paddleNode.physicsBody = .init(type: .kinematic, shape: .init(node: paddleNode, options: nil))
         paddleNode.position = .init(withSize/2, 0, withSize)
         self.rootNode.addChildNode(paddleNode)
+        self.paddle = paddleNode
         
         
         //MARK: Create the ball
