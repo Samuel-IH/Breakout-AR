@@ -26,6 +26,7 @@ class BreakoutBoard: SCNScene {
     ]
     
     fileprivate var ball = SCNNode()
+    var paddle = SCNNode()
     
     init(withSize: CGFloat = 0.3) {
         super.init()
@@ -61,6 +62,15 @@ class BreakoutBoard: SCNScene {
             
         }
         
+        
+        //MARK: Create the paddle
+        let paddleGeom = SCNBox(width: withSize/10, height: withSize/32, length: withSize/32, chamferRadius: 0)
+        let paddleNode = SCNNode(geometry: paddleGeom)
+        
+        paddleNode.position = .init(withSize/2, 0, withSize)
+        self.rootNode.addChildNode(paddleNode)
+        
+        
         //MARK: Create the ball
         let ballMat = SCNMaterial()
         ballMat.lightingModel = .physicallyBased
@@ -93,7 +103,7 @@ class BreakoutBoard: SCNScene {
             
             return n.transform
         }
-        self.ball.constraints?.append(ballLock)
+        self.ball.constraints = [ballLock]
         
         
         
