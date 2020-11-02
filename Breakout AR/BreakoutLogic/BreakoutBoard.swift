@@ -62,6 +62,35 @@ class BreakoutBoard: SCNScene {
             
         }
         
+        //create the "bounds"
+        let boundGeom = SCNCylinder(radius: withSize/100, height: withSize)
+        let boundCollider = SCNBox(width: withSize/100, height: withSize, length: withSize, chamferRadius: 0)
+        var boundNode = SCNNode(geometry: boundGeom)
+        boundNode.physicsBody = .init(type: .static, shape: .init(geometry: boundCollider, options: nil))
+        boundNode.physicsBody?.restitution = 1
+        
+        //left wall
+        boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, 0, 0)
+        boundNode.position = SCNVector3(0, 0, withSize/2)
+        self.rootNode.addChildNode(boundNode)
+        
+        //right wall
+        boundNode = boundNode.clone()
+        boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, 0, 0)
+        boundNode.position = SCNVector3(withSize, 0, withSize/2)
+        self.rootNode.addChildNode(boundNode)
+        
+        //back wall
+        boundNode = boundNode.clone()
+        boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, CGFloat(90).degreesToRadians, 0)
+        boundNode.position = SCNVector3(withSize/2, 0, 0)
+        self.rootNode.addChildNode(boundNode)
+        
+        //front wall
+        boundNode = boundNode.clone()
+        boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, CGFloat(90).degreesToRadians, 0)
+        boundNode.position = SCNVector3(withSize/2, 0, withSize)
+        self.rootNode.addChildNode(boundNode)
         
         //MARK: Create the paddle
         let paddleGeom = SCNBox(width: withSize/10, height: withSize/32, length: withSize/32, chamferRadius: 0)
@@ -137,4 +166,9 @@ extension BreakoutBoard: SCNPhysicsContactDelegate {
         
     }
     
+}
+
+extension FloatingPoint {
+    var degreesToRadians: Self { self * .pi / 180 }
+    var radiansToDegrees: Self { self * 180 / .pi }
 }

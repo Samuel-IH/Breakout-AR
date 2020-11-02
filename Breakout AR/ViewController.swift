@@ -29,7 +29,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
-        
+        sceneView.debugOptions = [.showPhysicsShapes]
         // Set the scene to the view
         sceneView.scene = board
         
