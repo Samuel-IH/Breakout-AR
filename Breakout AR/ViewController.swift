@@ -8,25 +8,34 @@
 import UIKit
 import SceneKit
 import ARKit
+import Vision
 
 class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    private var handPoseRequest = VNDetectHumanHandPoseRequest()
+    private var debugBall = SCNNode(geometry: SCNSphere(radius: 0.01))
+    private var viewportSize = CGSize()
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.viewportSize = self.sceneView.bounds.size
+        handPoseRequest.maximumHandCount = 1
         // Set the view's delegate
         sceneView.delegate = self
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         
-        // Create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
-        
         // Set the scene to the view
         sceneView.scene = BreakoutBoard()
+        
+        let node = SCNNode(geometry: SCNBox(width: 0.01, height: 0.01, length: 0.01, chamferRadius: 0))
+        node.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(node: node))
+        sceneView.pointOfView?.addChildNode(node)
+        
+        sceneView.scene.rootNode.addChildNode(debugBall)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -72,4 +81,42 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
     }
+}
+extension ViewController: SCNSceneRendererDelegate {
+    
+    func renderer(_ renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: TimeInterval) {
+        
+        guard let capturedImage = sceneView.session.currentFrame?.capturedImage else { return }
+        
+        let handler = VNImageRequestHandler(cvPixelBuffer: capturedImage, options: [:])
+        
+        do {
+            try handler.perform([handPoseRequest])
+            
+            guard let observation = handPoseRequest.results?.first else {
+                return
+            }
+            
+            let points = try observation.recognizedPoints(.all)
+
+            guard let wristPoint = points[.wrist] else {
+                return
+            }
+            // Ignore low confidence points.
+            guard wristPoint.confidence > 0.3 else {
+                return
+            }
+            let v = self.viewportSize
+            // Convert points from Vision coordinates to AVFoundation coordinates.
+            let wrist = CGPoint(x: wristPoint.location.y * v.width, y: wristPoint.location.x * v.height)
+            
+            guard let wrist3D = self.sceneView.unprojectPoint(wrist, ontoPlane: simd_float4x4(sceneView.scene.rootNode.transform)) else {
+                return
+            }
+            self.debugBall.simdPosition = wrist3D
+        } catch {
+            print(error.localizedDescription)
+        }
+    }
+
 }
