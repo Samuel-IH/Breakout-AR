@@ -27,6 +27,7 @@ class BreakoutBoard: SCNScene {
     
     fileprivate var ball = SCNNode()
     var paddle = SCNNode()
+    var ballSpeed = Float(0.1)
     
     init(withSize: CGFloat = 0.3) {
         super.init()
@@ -93,9 +94,9 @@ class BreakoutBoard: SCNScene {
         self.rootNode.addChildNode(boundNode)
         
         //MARK: Create the paddle
-        let paddleGeom = SCNBox(width: withSize/10, height: withSize/32, length: withSize/32, chamferRadius: 0)
+        let paddleGeom = SCNBox(width: withSize/5, height: withSize/32, length: withSize/32, chamferRadius: 0)
         let paddleNode = SCNNode(geometry: paddleGeom)
-        paddleNode.physicsBody = .init(type: .kinematic, shape: .init(node: paddleNode, options: nil))
+        paddleNode.physicsBody = .init(type: .kinematic, shape: .init(geometry: paddleGeom, options: nil))
         paddleNode.position = .init(withSize/2, 0, withSize)
         self.rootNode.addChildNode(paddleNode)
         self.paddle = paddleNode
@@ -114,6 +115,8 @@ class BreakoutBoard: SCNScene {
         let ballNode = SCNNode(geometry: ballGeom)
         ballNode.physicsBody = .init(type: .dynamic, shape: .init(geometry: ballGeom, options: nil))
         ballNode.physicsBody?.restitution = 1
+        ballNode.physicsBody?.velocity = SCNVector3(0, 0, -0.1)
+        ballNode.physicsBody?.damping = 0
         ballNode.position = .init(withSize/2, 0, withSize/2)
         
         self.rootNode.addChildNode(ballNode)
@@ -127,10 +130,26 @@ class BreakoutBoard: SCNScene {
         //constraint to lock the ball
         let ballLock = SCNTransformConstraint(inWorldSpace: false) {
             node, matrix in
+            guard node.physicsBody != nil else { return matrix }
+            
             let n = SCNNode()
             n.transform = matrix
             n.position.y = 0
+            node.transform = n.transform
+            // prevent the ball from moving up or down, even if we wipe the y value of the transform above
+            // the ball can still have a velocity in the y axis that will diminish the overall speed of the ball
+            node.physicsBody!.velocity.y = 0
+            // prevent the ball from moving sideways too much
+            node.physicsBody!.velocity.x = min(node.physicsBody!.velocity.x, 0.5)
+            node.physicsBody!.velocity.x = max(node.physicsBody!.velocity.x, -0.5)
+            // re-write the length of this vector, to enforce our desired speed
+            let vel = node.physicsBody!.velocity
+            let direction = vel / vel.length
+            node.physicsBody!.velocity = direction * self.ballSpeed
+            // remove any angular velocity, ball spinning looks a little weird in a gravity-free environment
+            node.physicsBody!.angularVelocity = .init(0, 0, 0, 0)
             
+            // finally, return the transform
             return n.transform
         }
         self.ball.constraints = [ballLock]
@@ -171,4 +190,19 @@ extension BreakoutBoard: SCNPhysicsContactDelegate {
 extension FloatingPoint {
     var degreesToRadians: Self { self * .pi / 180 }
     var radiansToDegrees: Self { self * 180 / .pi }
+}
+
+extension SCNVector3 {
+    /// Returns the length of the vector
+    var length: Float {
+        return sqrtf(self.x * self.x + self.y * self.y + self.z * self.z)
+    }
+}
+
+func *(lhs: SCNVector3, rhs: Float) -> SCNVector3 {
+    return SCNVector3(rhs * lhs.x, rhs * lhs.y, rhs * lhs.z)
+}
+
+func /(lhs: SCNVector3, rhs: Float) -> SCNVector3 {
+    return SCNVector3(lhs.x / rhs, lhs.y / rhs, lhs.z / rhs)
 }

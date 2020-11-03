@@ -18,6 +18,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     private var debugBall = SCNNode(geometry: SCNSphere(radius: 0.01))
     private var viewportSize = CGSize()
     
+    private var lastMoveTime = 0.0
+    
     var board = BreakoutBoard()
     
     override func viewDidLoad() {
@@ -48,6 +50,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let configuration = ARWorldTrackingConfiguration()
         configuration.environmentTexturing = .automatic
         configuration.isLightEstimationEnabled = true
+        configuration.frameSemantics.insert(.personSegmentationWithDepth)
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -88,7 +91,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 extension ViewController: SCNSceneRendererDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: TimeInterval) {
-        
+        if (lastMoveTime == 0) { lastMoveTime = time }
+        defer {
+            lastMoveTime = time
+        }
         guard let capturedImage = sceneView.session.currentFrame?.capturedImage else { return }
         
         let handler = VNImageRequestHandler(cvPixelBuffer: capturedImage, options: [:])
@@ -116,7 +122,12 @@ extension ViewController: SCNSceneRendererDelegate {
             guard let wrist3D = self.sceneView.unprojectPoint(wrist, ontoPlane: simd_float4x4(sceneView.scene.rootNode.transform)) else {
                 return
             }
-            self.board.paddle.position.x = wrist3D.x
+            var difference = self.board.paddle.position.x - wrist3D.x
+            
+            let lerpSpeed = 10.0 //speed of the lerp, higher numbers mean more immediate results, too high and the paddle may not be smooth
+            let lerp = min((time - lastMoveTime) * lerpSpeed, 1) // we have to clamp the results to 1 to prevent the potential of overdriving the lerp
+            difference *= Float(lerp)// lerp our difference before we apply it below
+            self.board.paddle.position.x -= difference
             self.debugBall.simdPosition = wrist3D
         } catch {
             print(error.localizedDescription)
