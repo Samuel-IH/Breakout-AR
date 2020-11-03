@@ -11,6 +11,7 @@ import SceneKit
 
 
 class BreakoutBoard: SCNScene {
+    static let boardSize: CGFloat = 0.3
     
     fileprivate struct BrickClass {
         var color: UIColor
@@ -18,45 +19,40 @@ class BreakoutBoard: SCNScene {
         var metalness = UIColor.black
     }
     
-    fileprivate let bricks : [BrickClass] = [
-        .init(color: .red),
-        .init(color: .orange),
-        .init(color: .green),
-        .init(color: .yellow)
+    fileprivate let bricks : [BreakoutBrick.BrickType] = [
+        .red,
+        .orange,
+        .green,
+        .yellow
     ]
     
     fileprivate var ball = SCNNode()
     var paddle = SCNNode()
     var ballSpeed = Float(0.1)
-    
-    init(withSize: CGFloat = 0.3) {
+    var boardSize: CGFloat
+    override init() {
+        
+        self.boardSize = Self.boardSize
+        
         super.init()
         
         
         //MARK: Create the board
         for (rowIndex, brickRow) in bricks.enumerated() {
-            /// The base material and base geom have to be defined per-brick, because they are instanced objects
-            
-            // base material
-            let mat = SCNMaterial()
-            mat.lightingModel = .physicallyBased
-            
-            // base geometry
-            let brickGeom = SCNBox(width: withSize/16, height: withSize/32, length: withSize/32, chamferRadius: 0)
-            
-            //customize the material and assign it to the geom
-            mat.diffuse.contents = brickRow.color
-            mat.roughness.contents = brickRow.roughness
-            mat.metalness.contents = brickRow.metalness
-            brickGeom.firstMaterial = mat
-            
-            
             for i in 1...14 {
                 /// Now we iterate through all the bricks, creating each row
-                let brick = SCNNode(geometry: brickGeom)
-                brick.position = SCNVector3(withSize / 14.0 * CGFloat(i), 0.0, withSize / 28.0 * CGFloat(rowIndex))
-                brick.physicsBody = .init(type: .kinematic, shape: .init(geometry: brickGeom, options: nil))
-                brick.physicsBody?.restitution = 1
+                var brick: BreakoutBrick = .yellow
+                switch brickRow {
+                case .red:
+                    brick = .red
+                case .orange:
+                    brick = .orange
+                case .green:
+                    brick = .green
+                case .yellow:
+                    brick = .yellow
+                }
+                brick.position = SCNVector3(boardSize / 14.0 * CGFloat(i), 0.0, boardSize / 28.0 * CGFloat(rowIndex))
                 
                 self.rootNode.addChildNode(brick)
             }
@@ -64,40 +60,40 @@ class BreakoutBoard: SCNScene {
         }
         
         //create the "bounds"
-        let boundGeom = SCNCylinder(radius: withSize/100, height: withSize)
-        let boundCollider = SCNBox(width: withSize/100, height: withSize, length: withSize, chamferRadius: 0)
+        let boundGeom = SCNCylinder(radius: boardSize/100, height: boardSize)
+        let boundCollider = SCNBox(width: boardSize/100, height: boardSize, length: boardSize, chamferRadius: 0)
         var boundNode = SCNNode(geometry: boundGeom)
         boundNode.physicsBody = .init(type: .static, shape: .init(geometry: boundCollider, options: nil))
         boundNode.physicsBody?.restitution = 1
         
         //left wall
         boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, 0, 0)
-        boundNode.position = SCNVector3(0, 0, withSize/2)
+        boundNode.position = SCNVector3(0, 0, boardSize/2)
         self.rootNode.addChildNode(boundNode)
         
         //right wall
         boundNode = boundNode.clone()
         boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, 0, 0)
-        boundNode.position = SCNVector3(withSize, 0, withSize/2)
+        boundNode.position = SCNVector3(boardSize, 0, boardSize/2)
         self.rootNode.addChildNode(boundNode)
         
         //back wall
         boundNode = boundNode.clone()
         boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, CGFloat(90).degreesToRadians, 0)
-        boundNode.position = SCNVector3(withSize/2, 0, 0)
+        boundNode.position = SCNVector3(boardSize/2, 0, 0)
         self.rootNode.addChildNode(boundNode)
         
         //front wall
         boundNode = boundNode.clone()
         boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, CGFloat(90).degreesToRadians, 0)
-        boundNode.position = SCNVector3(withSize/2, 0, withSize)
+        boundNode.position = SCNVector3(boardSize/2, 0, boardSize)
         self.rootNode.addChildNode(boundNode)
         
         //MARK: Create the paddle
-        let paddleGeom = SCNBox(width: withSize/5, height: withSize/32, length: withSize/32, chamferRadius: 0)
+        let paddleGeom = SCNBox(width: boardSize/5, height: boardSize/32, length: boardSize/32, chamferRadius: 0)
         let paddleNode = SCNNode(geometry: paddleGeom)
         paddleNode.physicsBody = .init(type: .kinematic, shape: .init(geometry: paddleGeom, options: nil))
-        paddleNode.position = .init(withSize/2, 0, withSize)
+        paddleNode.position = .init(boardSize/2, 0, boardSize)
         self.rootNode.addChildNode(paddleNode)
         self.paddle = paddleNode
         
@@ -109,7 +105,7 @@ class BreakoutBoard: SCNScene {
         ballMat.roughness.contents = UIColor.black
         ballMat.diffuse.contents = UIColor.white
         
-        let ballGeom = SCNSphere(radius: withSize/32)
+        let ballGeom = SCNSphere(radius: boardSize/32)
         ballGeom.firstMaterial = ballMat
         
         let ballNode = SCNNode(geometry: ballGeom)
@@ -117,7 +113,7 @@ class BreakoutBoard: SCNScene {
         ballNode.physicsBody?.restitution = 1
         ballNode.physicsBody?.velocity = SCNVector3(0, 0, -0.1)
         ballNode.physicsBody?.damping = 0
-        ballNode.position = .init(withSize/2, 0, withSize/2)
+        ballNode.position = .init(boardSize/2, 0, boardSize/2)
         
         self.rootNode.addChildNode(ballNode)
         self.ball = ballNode
