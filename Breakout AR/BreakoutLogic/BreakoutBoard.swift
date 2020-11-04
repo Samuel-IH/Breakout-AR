@@ -36,6 +36,9 @@ class BreakoutBoard: SCNScene {
     var paddle = SCNNode()
     var ballSpeed = Float(0.1)
     var boardSize: CGFloat
+    ///This node represents the entire board, you can move this node around to control the location of the board.
+    var boardNode = SCNNode()
+    
     override init() {
         
         self.boardSize = Self.boardSize
@@ -44,6 +47,8 @@ class BreakoutBoard: SCNScene {
         
         
         //MARK: Create the board
+        self.rootNode.addChildNode(boardNode)
+        
         for (rowIndex, brickRow) in bricks.enumerated() {
             for i in 1...14 {
                 /// Now we iterate through all the bricks, creating each row
@@ -60,7 +65,7 @@ class BreakoutBoard: SCNScene {
                 }
                 brick.position = SCNVector3(boardSize / 14.0 * CGFloat(i), 0.0, boardSize / 28.0 * CGFloat(rowIndex))
                 
-                self.rootNode.addChildNode(brick)
+                self.boardNode.addChildNode(brick)
             }
             
         }
@@ -78,25 +83,25 @@ class BreakoutBoard: SCNScene {
         //left wall
         boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, 0, 0)
         boundNode.position = SCNVector3(0, 0, boardSize/2)
-        self.rootNode.addChildNode(boundNode)
+        self.boardNode.addChildNode(boundNode)
         
         //right wall
         boundNode = boundNode.clone()
         boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, 0, 0)
         boundNode.position = SCNVector3(boardSize, 0, boardSize/2)
-        self.rootNode.addChildNode(boundNode)
+        self.boardNode.addChildNode(boundNode)
         
         //back wall
         boundNode = boundNode.clone()
         boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, CGFloat(90).degreesToRadians, 0)
         boundNode.position = SCNVector3(boardSize/2, 0, 0)
-        self.rootNode.addChildNode(boundNode)
+        self.boardNode.addChildNode(boundNode)
         
         //front wall
         boundNode = boundNode.clone()
         boundNode.eulerAngles = SCNVector3(CGFloat(90).degreesToRadians, CGFloat(90).degreesToRadians, 0)
         boundNode.position = SCNVector3(boardSize/2, 0, boardSize)
-        self.rootNode.addChildNode(boundNode)
+        self.boardNode.addChildNode(boundNode)
         
         //MARK: Create the paddle
         let paddleGeom = SCNBox(width: boardSize/5, height: boardSize/32, length: boardSize/32, chamferRadius: 0)
@@ -106,7 +111,7 @@ class BreakoutBoard: SCNScene {
         paddleNode.physicsBody?.collisionBitMask = Self.Masks.ball
         paddleNode.physicsBody?.contactTestBitMask = Self.Masks.ball
         paddleNode.position = .init(boardSize/2, 0, boardSize)
-        self.rootNode.addChildNode(paddleNode)
+        self.boardNode.addChildNode(paddleNode)
         self.paddle = paddleNode
         
         
@@ -130,7 +135,7 @@ class BreakoutBoard: SCNScene {
         ballNode.physicsBody?.collisionBitMask = BreakoutBoard.Masks.brick | BreakoutBoard.Masks.bounds
         ballNode.position = .init(boardSize/2, 0, boardSize/2)
         
-        self.rootNode.addChildNode(ballNode)
+        self.boardNode.addChildNode(ballNode)
         self.ball = ballNode
         
         //MARK: Configure the physics
