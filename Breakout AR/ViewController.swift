@@ -91,6 +91,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 extension ViewController: SCNSceneRendererDelegate {
     
     func renderer(_ renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: TimeInterval) {
+        return;// needs to be tested for performance
         if (lastMoveTime == 0) { lastMoveTime = time }
         defer {
             lastMoveTime = time

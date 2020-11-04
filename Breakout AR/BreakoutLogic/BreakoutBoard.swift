@@ -74,7 +74,7 @@ class BreakoutBoard: SCNScene {
         let boundGeom = SCNCylinder(radius: boardSize/100, height: boardSize)
         let boundCollider = SCNBox(width: boardSize/100, height: boardSize, length: boardSize, chamferRadius: 0)
         var boundNode = SCNNode(geometry: boundGeom)
-        boundNode.physicsBody = .init(type: .static, shape: .init(geometry: boundCollider, options: nil))
+        boundNode.physicsBody = .init(type: .kinematic, shape: .init(geometry: boundCollider, options: nil))
         boundNode.physicsBody?.categoryBitMask = Self.Masks.bounds
         boundNode.physicsBody?.collisionBitMask = Self.Masks.ball
         boundNode.physicsBody?.contactTestBitMask = Self.Masks.ball
@@ -152,18 +152,27 @@ class BreakoutBoard: SCNScene {
             n.transform = matrix
             n.position.y = 0
             node.transform = n.transform
-            // prevent the ball from moving up or down, even if we wipe the y value of the transform above
-            // the ball can still have a velocity in the y axis that will diminish the overall speed of the ball
-            node.physicsBody!.velocity.y = 0
-            // the sideways velocity should never be greater than the forward-backward velocity
-            if (abs(node.physicsBody!.velocity.x) > abs(node.physicsBody!.velocity.z)) {
-                let m : Float = (node.physicsBody!.velocity.x < 0) ? -1 : 1
-                node.physicsBody!.velocity.x = node.physicsBody!.velocity.z * m
+            
+            // Convert the world space velocity to local velocity
+            guard var localVelocity = node.parent?.convertVector(node.physicsBody!.velocity, from: nil) else {
+                return n.transform
             }
+            
+            // prevent the ball from moving up or down. Even if we wipe the y value of the transform above,
+            // the ball can still have a velocity in the y axis that will diminish the overall speed of the ball
+            localVelocity.y = 0
+            
+            // the sideways velocity should never be greater than the forward-backward velocity
+            // (as this would mean that the ball is bouncing from left to right, possibly endlessly)
+            if (abs(localVelocity.x) > abs(localVelocity.z)) {
+                let m : Float = (localVelocity.x < 0) ? -1 : 1
+                localVelocity.x = localVelocity.z * m
+            }
+            
             // re-write the length of this vector, to enforce our desired speed
-            let vel = node.physicsBody!.velocity
-            let direction = vel / vel.length
-            node.physicsBody!.velocity = direction * self.ballSpeed
+            let direction = localVelocity / localVelocity.length
+            let finalLocalVelocity = direction * self.ballSpeed
+            node.physicsBody!.velocity = node.parent!.convertVector(finalLocalVelocity, to: nil)
             // remove any angular velocity, ball spinning looks a little weird in a gravity-free environment
             node.physicsBody!.angularVelocity = .init(0, 0, 0, 0)
             
