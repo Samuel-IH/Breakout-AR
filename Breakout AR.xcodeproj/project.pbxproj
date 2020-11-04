@@ -16,6 +16,7 @@
 		44915EEB254E51870034C73E /* Breakout_ARTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44915EEA254E51870034C73E /* Breakout_ARTests.swift */; };
 		44915EF6254E51870034C73E /* Breakout_ARUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44915EF5254E51870034C73E /* Breakout_ARUITests.swift */; };
 		44915F08254E54660034C73E /* BreakoutBoard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44915F07254E54660034C73E /* BreakoutBoard.swift */; };
+		4495ED4E2553652900331FC3 /* Beacon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4495ED4D2553652900331FC3 /* Beacon.swift */; };
 		44ED262D255205B3006C4FB8 /* BreakoutBrick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44ED262C255205B3006C4FB8 /* BreakoutBrick.swift */; };
 /* End PBXBuildFile section */
 
@@ -52,6 +53,7 @@
 		44915EF5254E51870034C73E /* Breakout_ARUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Breakout_ARUITests.swift; sourceTree = "<group>"; };
 		44915EF7254E51870034C73E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		44915F07254E54660034C73E /* BreakoutBoard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreakoutBoard.swift; sourceTree = "<group>"; };
+		4495ED4D2553652900331FC3 /* Beacon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Beacon.swift; sourceTree = "<group>"; };
 		44ED262C255205B3006C4FB8 /* BreakoutBrick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BreakoutBrick.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -107,6 +109,7 @@
 				44915F06254E542F0034C73E /* BreakoutLogic */,
 				44915ED5254E51840034C73E /* art.scnassets */,
 				44915ED7254E51840034C73E /* ViewController.swift */,
+				4495ED4D2553652900331FC3 /* Beacon.swift */,
 				44915ED9254E51840034C73E /* Main.storyboard */,
 				44915EDC254E51870034C73E /* Assets.xcassets */,
 				44915EDE254E51870034C73E /* LaunchScreen.storyboard */,
@@ -275,6 +278,7 @@
 			files = (
 				44915ED8254E51840034C73E /* ViewController.swift in Sources */,
 				44915F08254E54660034C73E /* BreakoutBoard.swift in Sources */,
+				4495ED4E2553652900331FC3 /* Beacon.swift in Sources */,
 				44ED262D255205B3006C4FB8 /* BreakoutBrick.swift in Sources */,
 				44915ED4254E51840034C73E /* AppDelegate.swift in Sources */,
 			);

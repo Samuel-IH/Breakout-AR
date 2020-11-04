@@ -14,30 +14,41 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    enum GameState {
+        ///The game is being set up, the user is allowed to move the board around and rotate it.
+        case setup
+        ///The game is started, the board may no longer be moved and gameplay begins.
+        case started
+        ///The game has completed, user is shown their score and prompted to play again. If the user restarts the game the board defaults to the previous position
+        case ended
+    }
+    private var state : GameState = .setup
+    
     private var handPoseRequest = VNDetectHumanHandPoseRequest()
     private var debugBall = SCNNode(geometry: SCNSphere(radius: 0.01))
     private var viewportSize = CGSize()
     
     private var lastMoveTime = 0.0
-    
+    private var beacon = BreakoutBeacon(withPoV: nil)
     var board = BreakoutBoard()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        //setup hand tracking
         self.viewportSize = self.sceneView.bounds.size
         handPoseRequest.maximumHandCount = 1
+        
         // Set the view's delegate
         sceneView.delegate = self
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
         sceneView.debugOptions = [.showPhysicsShapes]
+        
         // Set the scene to the view
         sceneView.scene = board
         
-        let node = SCNNode(geometry: SCNBox(width: 0.01, height: 0.01, length: 0.01, chamferRadius: 0))
-        node.physicsBody = SCNPhysicsBody(type: .kinematic, shape: SCNPhysicsShape(node: node))
-        sceneView.pointOfView?.addChildNode(node)
         
         sceneView.scene.rootNode.addChildNode(debugBall)
         
@@ -51,6 +62,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         configuration.environmentTexturing = .automatic
         configuration.isLightEstimationEnabled = true
         configuration.frameSemantics.insert(.personSegmentationWithDepth)
+        configuration.planeDetection = .horizontal
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -64,14 +76,20 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     // MARK: - ARSCNViewDelegate
     
-/*
+
     // Override to create and configure nodes for anchors added to the view's session.
     func renderer(_ renderer: SCNSceneRenderer, nodeFor anchor: ARAnchor) -> SCNNode? {
-        let node = SCNNode()
-     
-        return node
+        
+        if let _ = anchor as? ARPlaneAnchor {
+            let beaconC = beacon.cloneBeacon()
+            beaconC.lookAt.target = sceneView.pointOfView
+            return beaconC
+        }
+        
+
+        return nil
     }
-*/
+
     
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
