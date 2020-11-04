@@ -13,6 +13,12 @@ import SceneKit
 class BreakoutBoard: SCNScene {
     static let boardSize: CGFloat = 0.3
     
+    struct Masks {
+        static let ball = 1 << 1
+        static let bounds = 1 << 2
+        static let brick = 1 << 3
+    }
+    
     fileprivate struct BrickClass {
         var color: UIColor
         var roughness = UIColor.gray
@@ -64,6 +70,9 @@ class BreakoutBoard: SCNScene {
         let boundCollider = SCNBox(width: boardSize/100, height: boardSize, length: boardSize, chamferRadius: 0)
         var boundNode = SCNNode(geometry: boundGeom)
         boundNode.physicsBody = .init(type: .static, shape: .init(geometry: boundCollider, options: nil))
+        boundNode.physicsBody?.categoryBitMask = Self.Masks.bounds
+        boundNode.physicsBody?.collisionBitMask = Self.Masks.ball
+        boundNode.physicsBody?.contactTestBitMask = Self.Masks.ball
         boundNode.physicsBody?.restitution = 1
         
         //left wall
@@ -93,6 +102,9 @@ class BreakoutBoard: SCNScene {
         let paddleGeom = SCNBox(width: boardSize/5, height: boardSize/32, length: boardSize/32, chamferRadius: 0)
         let paddleNode = SCNNode(geometry: paddleGeom)
         paddleNode.physicsBody = .init(type: .kinematic, shape: .init(geometry: paddleGeom, options: nil))
+        paddleNode.physicsBody?.categoryBitMask = Self.Masks.bounds
+        paddleNode.physicsBody?.collisionBitMask = Self.Masks.ball
+        paddleNode.physicsBody?.contactTestBitMask = Self.Masks.ball
         paddleNode.position = .init(boardSize/2, 0, boardSize)
         self.rootNode.addChildNode(paddleNode)
         self.paddle = paddleNode
@@ -113,6 +125,9 @@ class BreakoutBoard: SCNScene {
         ballNode.physicsBody?.restitution = 1
         ballNode.physicsBody?.velocity = SCNVector3(0, 0, -0.1)
         ballNode.physicsBody?.damping = 0
+        ballNode.physicsBody?.categoryBitMask = BreakoutBoard.Masks.ball
+        ballNode.physicsBody?.contactTestBitMask = BreakoutBoard.Masks.brick | BreakoutBoard.Masks.bounds
+        ballNode.physicsBody?.collisionBitMask = BreakoutBoard.Masks.brick | BreakoutBoard.Masks.bounds
         ballNode.position = .init(boardSize/2, 0, boardSize/2)
         
         self.rootNode.addChildNode(ballNode)
@@ -135,9 +150,11 @@ class BreakoutBoard: SCNScene {
             // prevent the ball from moving up or down, even if we wipe the y value of the transform above
             // the ball can still have a velocity in the y axis that will diminish the overall speed of the ball
             node.physicsBody!.velocity.y = 0
-            // prevent the ball from moving sideways too much
-            node.physicsBody!.velocity.x = min(node.physicsBody!.velocity.x, 0.5)
-            node.physicsBody!.velocity.x = max(node.physicsBody!.velocity.x, -0.5)
+            // the sideways velocity should never be greater than the forward-backward velocity
+            if (abs(node.physicsBody!.velocity.x) > abs(node.physicsBody!.velocity.z)) {
+                let m : Float = (node.physicsBody!.velocity.x < 0) ? -1 : 1
+                node.physicsBody!.velocity.x = node.physicsBody!.velocity.z * m
+            }
             // re-write the length of this vector, to enforce our desired speed
             let vel = node.physicsBody!.velocity
             let direction = vel / vel.length
@@ -178,7 +195,10 @@ extension BreakoutBoard: SCNPhysicsContactDelegate {
             other = contact.nodeB
         }
         
-        
+        if let brick = other as? BreakoutBrick {
+            let brickBreak = SCNAction.sequence([.fadeOut(duration: 0.25), .removeFromParentNode()])
+            brick.runAction(brickBreak)
+        }
     }
     
 }

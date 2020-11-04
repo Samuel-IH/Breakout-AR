@@ -56,6 +56,7 @@ class BreakoutBrick: SCNNode {
         self.geometry = geometry
         self.physicsBody = .init(type: .kinematic, shape: .init(geometry: geometry, options: nil))
         self.physicsBody?.restitution = 1
+        self.physicsBody?.categoryBitMask = BreakoutBoard.Masks.brick
     }
     
     required init?(coder: NSCoder) {
@@ -76,19 +77,19 @@ extension BreakoutBrick {
     }
     static var orange: BreakoutBrick {
         get {
-            let brick = BreakoutBrick(geometry: Self.redBrickGeom, type: .orange)
+            let brick = BreakoutBrick(geometry: Self.orangeBrickGeom, type: .orange)
             return brick
         }
     }
     static var green: BreakoutBrick {
         get {
-            let brick = BreakoutBrick(geometry: Self.redBrickGeom, type: .green)
+            let brick = BreakoutBrick(geometry: Self.greenBrickGeom, type: .green)
             return brick
         }
     }
     static var yellow: BreakoutBrick {
         get {
-            let brick = BreakoutBrick(geometry: Self.redBrickGeom, type: .yellow)
+            let brick = BreakoutBrick(geometry: Self.yellowBrickGeom, type: .yellow)
             return brick
         }
     }
