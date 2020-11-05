@@ -42,7 +42,8 @@ class BreakoutBoard: SCNScene {
     override init() {
         
         self.boardSize = Self.boardSize
-        
+        self.boardNode.isHidden = true
+        self.boardNode.pivot = SCNMatrix4MakeTranslation(Float(boardSize) / 2, 0, Float(boardSize) / 2)
         super.init()
         
         
@@ -128,7 +129,6 @@ class BreakoutBoard: SCNScene {
         let ballNode = SCNNode(geometry: ballGeom)
         ballNode.physicsBody = .init(type: .dynamic, shape: .init(geometry: ballGeom, options: nil))
         ballNode.physicsBody?.restitution = 1
-        ballNode.physicsBody?.velocity = SCNVector3(0, 0, -0.1)
         ballNode.physicsBody?.damping = 0
         ballNode.physicsBody?.categoryBitMask = BreakoutBoard.Masks.ball
         ballNode.physicsBody?.contactTestBitMask = BreakoutBoard.Masks.brick | BreakoutBoard.Masks.bounds

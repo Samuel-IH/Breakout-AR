@@ -12,18 +12,18 @@ class BreakoutBeacon: SCNNode {
     
     var lookAt: SCNLookAtConstraint
     fileprivate var beacon: SCNNode
-    init(withPoV: SCNNode?) {
+    init(withPoV: SCNNode?, andText: String = "Tap a flat surface to place the board\n\n\n\n", andDisc: Bool = true) {
         //create the constraint for the text
         lookAt = SCNLookAtConstraint(target: withPoV)
         lookAt.localFront = .init(0, 0, 1)
         lookAt.isGimbalLockEnabled = true
         
-        beacon = SCNNode(geometry: SCNSphere(radius: 0.01))
+        beacon = SCNNode()
         
         super.init()
         
         //create the text
-        let text = SCNText(string: "Tap a flat surface to place the board\n\n\n\n", extrusionDepth: 0)
+        let text = SCNText(string: andText, extrusionDepth: 0)
         text.font = UIFont(name: "Helvetica Neue", size: 16)!
         let textNode = SCNNode(geometry: text)
         var min = textNode.boundingBox.min
@@ -53,6 +53,7 @@ class BreakoutBeacon: SCNNode {
         //create a disc
         let plate = SCNNode(geometry: SCNTorus(ringRadius: 0.08, pipeRadius: 0.002))
         plate.scale.y = 0//flattened circle
+        plate.isHidden = !andDisc
         
         //create the parent node
         

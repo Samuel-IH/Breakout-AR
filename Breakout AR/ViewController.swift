@@ -30,6 +30,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     private var lastMoveTime = 0.0
     private var beacon = BreakoutBeacon(withPoV: nil)
+    private var handBeacon = BreakoutBeacon(withPoV: nil, andText: "Use your hand to control the paddle\n\n\n\n", andDisc: false)
+    private var workQueue: [()->()] = []
     var board = BreakoutBoard()
     
     override func viewDidLoad() {
@@ -48,6 +50,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Set the scene to the view
         sceneView.scene = board
+        
+        if let pov = sceneView.pointOfView {
+            board.paddle.addChildNode(handBeacon)
+            handBeacon.lookAt.target = pov
+        }
         
         
         sceneView.scene.rootNode.addChildNode(debugBall)
@@ -90,7 +97,24 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return nil
     }
 
-    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            if state == .setup {
+                guard let query = sceneView.raycastQuery(from: touch.location(in: sceneView), allowing: .estimatedPlane, alignment: .horizontal) else {return}
+                guard let raycastResult = sceneView.session.raycast(query).first else { return }
+                workQueue.append { [weak self] in
+                    guard let self = self else { return }
+                    self.board.boardNode.transform = SCNMatrix4(raycastResult.worldTransform)
+                    self.board.boardNode.eulerAngles.y = self.sceneView.pointOfView!.eulerAngles.y
+                    if self.board.boardNode.isHidden {
+                        
+                    }
+                    self.board.boardNode.isHidden = false
+                }
+
+            }
+        }
+    }
     func session(_ session: ARSession, didFailWithError error: Error) {
         // Present an error message to the user
         
@@ -108,8 +132,14 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 }
 extension ViewController: SCNSceneRendererDelegate {
     
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        for work in workQueue {
+            work()
+        }
+        workQueue.removeAll()
+    }
+    
     func renderer(_ renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: TimeInterval) {
-        return;// needs to be tested for performance
         if (lastMoveTime == 0) { lastMoveTime = time }
         defer {
             lastMoveTime = time
